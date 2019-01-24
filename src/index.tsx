@@ -46,17 +46,16 @@ export interface IFieldProps {
   placeholder?: string;
   defaultValue?: any;
   render: React.ComponentType<IFieldRenderProps>;
-  onChange?: (value: any, resetFields?: () => void) => void;
-  onBlur?: (value: any, resetFields?: () => void) => void;
+  onChange?: (value: any, errors?: string[], resetFields?: () => void) => void;
+  onBlur?: (value: any, errors?: string[], resetFields?: () => void) => void;
   validationRules?: validationRulesType;
-  validateOn?: ValidateOnTypes;
+  validate?: true;
   showAsteriskOnRequired?: boolean;
   customProps?: any;
   customValidation?: (value?: any, validationRules?: validationRulesType) => string[];
   validationMessages?: IValidationFailMessages;
 }
 export interface IFieldState {
-  shouldUpdate: boolean;
   value: any;
   errors: string[];
   customErrors: string[];
@@ -69,7 +68,6 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
     super(props);
 
     this.state = {
-      shouldUpdate: false,
       value: this.props.defaultValue,
       errors: [],
       customErrors: [],
@@ -82,13 +80,14 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
     this._resetField = this._resetField.bind(this);
   }
   public componentDidUpdate(prevProps: IFieldProps) {
-    if (this.props.validationRules !== prevProps.validationRules) {
-      this.setState({ shouldUpdate: true });
+    if (prevProps.defaultValue === undefined && this.props.defaultValue !== prevProps.defaultValue) {
+      this.setState({ value: this.props.defaultValue });
     }
   }
 
   public render() {
-    const { validationRules, validateOn, showAsteriskOnRequired } = this.props;
+    const { validationRules, validate, showAsteriskOnRequired } = this.props;
+    const errors = [...this.state.errors, ...this.state.customErrors];
 
     return (
       React.createElement(this.props.render, {
@@ -109,16 +108,9 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
               `${value}` : value;
           this.setState(() => ({ value: _value }));
 
-          if (this.props.onChange) this.props.onChange(_value, this._resetField);
-          if (validateOn === ValidateOnTypes.OnChange) {
-            this._validateField();
-            if (this.props.customValidation)
-              this._updateCustomValidationMessage(
-                this.props.customValidation(_value, this.props.validationRules),
-              );
-          }
+          if (this.props.onChange) this.props.onChange(_value, errors, this._resetField);
         },
-        onBlur: (
+        onBlur: async (
           value: any,
           e?: React.MouseEvent<HTMLInputElement>,
         ) => {
@@ -128,14 +120,17 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
               typeof value === "number" ?
               `${value}` : value;
 
-          if (this.props.onBlur) this.props.onBlur(_value, this._resetField);
-          if (validateOn === ValidateOnTypes.OnBlur) {
-            this._validateField();
+          let customErrors: string[] = [];
+          let defaultErrors: string[] = [];
+          if (validate) {
+            defaultErrors = await this._validateField();
             if (this.props.customValidation)
-              this._updateCustomValidationMessage(
+              customErrors = await this._updateCustomValidationMessage(
                 this.props.customValidation(_value, this.props.validationRules),
               );
           }
+
+          if (this.props.onBlur) this.props.onBlur(_value, [...defaultErrors, ...customErrors], this._resetField);
         },
         label: showAsteriskOnRequired && this.props.validationRules && this.props.validationRules.required ?
           `${this.props.label}*` :
@@ -150,53 +145,52 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
     this.setState({ value: null });
   }
 
-  private _validateField() {
-    const { validationRules, label, name } = this.props;
-    const { value } = this.state;
+  private _validateField(): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+      const { validationRules, label, name } = this.props;
+      const { value } = this.state;
 
-    if (validationRules && validationRules.type) {
-      let result: IValidationResponse;
-      switch (validationRules.type) {
-        case validationTypes.String:
-          result =
-            this.validator[validationTypes.String](label || name, value || "", validationRules);
-          break;
-        case validationTypes.Number:
-          result =
-            this.validator[validationTypes.Number](label || name, value, validationRules);
-          break;
-        case validationTypes.Date:
-          result =
-            this.validator[validationTypes.Date](label || name, value, validationRules);
-          break;
-        case validationTypes.Email:
-          result =
-            this.validator[validationTypes.Email](label || name, value || "", validationRules);
-          break;
+      if (validationRules && validationRules.type) {
+        let result: IValidationResponse;
+        switch (validationRules.type) {
+          case validationTypes.String:
+            result =
+              this.validator[validationTypes.String](label || name, value || "", validationRules);
+            break;
+          case validationTypes.Number:
+            result =
+              this.validator[validationTypes.Number](label || name, value, validationRules);
+            break;
+          case validationTypes.Date:
+            result =
+              this.validator[validationTypes.Date](label || name, value, validationRules);
+            break;
+          case validationTypes.Email:
+            result =
+              this.validator[validationTypes.Email](label || name, value || "", validationRules);
+            break;
 
-        default:
-          result = {
-            success: true,
-            messages: [],
-          };
-          break;
+          default:
+            result = {
+              success: true,
+              messages: [],
+            };
+            break;
+        }
+        if (!result.success) {
+          this.setState({ errors: result.messages }, () => resolve(result.messages));
+        } else {
+          this.setState({ errors: [] }, () => resolve([]));
+        }
+      } else {
+        resolve([]);
       }
-      if (!result.success) {
-        this.setState({
-          errors: result.messages,
-        });
-
-        return false;
-      }
-      this.setState({ errors: [] });
-    }
-
-    return true;
+    });
   }
 
-  private _updateCustomValidationMessage(errors: string[]) {
-    this.setState({
-      customErrors: errors,
+  private _updateCustomValidationMessage(errors: string[]): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+      this.setState({ customErrors: errors }, () => resolve(errors));
     });
   }
 }
