@@ -46,7 +46,8 @@ export interface IFieldProps {
   placeholder?: string;
   defaultValue?: any;
   render: React.ComponentType<IFieldRenderProps>;
-  onChange?: (value: any, errors?: string[], resetFields?: () => void) => void;
+  hideLabel?: boolean;
+  onChange?: (value: any, resetFields?: () => void) => void;
   onBlur?: (value: any, errors?: string[], resetFields?: () => void) => void;
   validationRules?: validationRulesType;
   validate?: true;
@@ -108,7 +109,7 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
               `${value}` : value;
           this.setState(() => ({ value: _value }));
 
-          if (this.props.onChange) this.props.onChange(_value, errors, this._resetField);
+          if (this.props.onChange) this.props.onChange(_value, this._resetField);
         },
         onBlur: async (
           value: any,
@@ -132,9 +133,10 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
 
           if (this.props.onBlur) this.props.onBlur(_value, [...defaultErrors, ...customErrors], this._resetField);
         },
-        label: showAsteriskOnRequired && this.props.validationRules && this.props.validationRules.required ?
-          `${this.props.label}*` :
-          this.props.label,
+        label: !this.props.hideLabel &&
+          (showAsteriskOnRequired && this.props.validationRules && this.props.validationRules.required ?
+            `${this.props.label}*` :
+            this.props.label) || undefined,
         validationRules: this.props.validationRules,
         errors: [...this.state.errors, ...this.state.customErrors],
       })
