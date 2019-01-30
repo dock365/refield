@@ -19,6 +19,7 @@ export interface IFieldRenderProps {
   name: string;
   placeholder?: string;
   defaultValue?: any;
+  defaultValueIsUpdatable?: boolean;
   value?: any;
   customProps?: any;
   onChange?: (
@@ -103,6 +104,7 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
         name: this.props.name,
         placeholder: this.props.placeholder,
         defaultValue: this.props.defaultValue,
+        defaultValueIsUpdatable: this.props.defaultValueIsUpdatable,
         value: this.state.value,
         customProps: this.props.customProps,
         className: this.props.className,
