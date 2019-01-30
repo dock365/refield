@@ -47,6 +47,7 @@ export interface IFieldProps {
   label?: string;
   placeholder?: string;
   defaultValue?: any;
+  defaultValueIsUpdatable?: boolean;
   render: React.ComponentType<IFieldRenderProps>;
   hideLabel?: boolean;
   readOnly?: boolean;
@@ -85,7 +86,10 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
     this._resetField = this._resetField.bind(this);
   }
   public componentDidUpdate(prevProps: IFieldProps) {
-    if (prevProps.defaultValue === undefined && this.props.defaultValue !== prevProps.defaultValue) {
+    if (
+      prevProps.defaultValue === undefined && this.props.defaultValue !== prevProps.defaultValue ||
+      this.props.defaultValueIsUpdatable && this.props.defaultValue !== prevProps.defaultValue
+    ) {
       this.setState({ value: this.props.defaultValue });
     }
   }
