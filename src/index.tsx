@@ -16,7 +16,7 @@ export type validationRulesType =
   (IEmailValidationOptions & { type: validationTypes.Email });
 
 export interface IFieldRenderProps {
-  name: string;
+  name?: string;
   placeholder?: string;
   defaultValue?: any;
   defaultValueIsUpdatable?: boolean;
@@ -44,7 +44,7 @@ export enum ValidateOnTypes {
 }
 
 export interface IFieldProps {
-  name: string;
+  name?: string;
   label?: string;
   placeholder?: string;
   defaultValue?: any;
@@ -169,19 +169,19 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
         switch (validationRules.type) {
           case validationTypes.String:
             result =
-              this.validator[validationTypes.String](label || name, value || "", validationRules);
+              this.validator[validationTypes.String](label || name || "", value || "", validationRules);
             break;
           case validationTypes.Number:
             result =
-              this.validator[validationTypes.Number](label || name, value, validationRules);
+              this.validator[validationTypes.Number](label || name || "", value, validationRules);
             break;
           case validationTypes.Date:
             result =
-              this.validator[validationTypes.Date](label || name, value, validationRules);
+              this.validator[validationTypes.Date](label || name || "", value, validationRules);
             break;
           case validationTypes.Email:
             result =
-              this.validator[validationTypes.Email](label || name, value || "", validationRules);
+              this.validator[validationTypes.Email](label || name || "", value || "", validationRules);
             break;
 
           default:
