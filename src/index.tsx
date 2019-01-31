@@ -36,6 +36,7 @@ export interface IFieldRenderProps {
   resetField?: () => void;
   className?: string;
   readOnly?: boolean;
+  onClick?: (event: React.MouseEvent<any>) => void;
 }
 
 export enum ValidateOnTypes {
@@ -61,6 +62,7 @@ export interface IFieldProps {
   className?: string;
   customValidation?: (value?: any, validationRules?: validationRulesType) => string[];
   validationMessages?: IValidationFailMessages;
+  onClick?: (event: React.MouseEvent<any>) => void;
 }
 export interface IFieldState {
   value: any;
@@ -109,6 +111,7 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
         customProps: this.props.customProps,
         className: this.props.className,
         readOnly: this.props.readOnly,
+        onClick: this.props.onClick,
         onChange: (
           value: any,
           e?: React.MouseEvent<HTMLInputElement>,
