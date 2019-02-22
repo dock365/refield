@@ -45,7 +45,7 @@ export enum ValidateOnTypes {
 }
 
 export interface IFieldProps {
-  name?: string;
+  name: string;
   label?: string;
   placeholder?: string;
   defaultValue?: any;
@@ -53,8 +53,8 @@ export interface IFieldProps {
   render: React.ComponentType<IFieldRenderProps>;
   hideLabel?: boolean;
   readOnly?: boolean;
-  onChange?: (value: any, resetFields?: () => void) => void;
-  onBlur?: (value: any, errors?: string[], resetFields?: () => void) => void;
+  onChange?: (value: any, name: string, resetFields: () => void) => void;
+  onBlur?: (value: any, name: string, errors: string[], resetFields: () => void) => void;
   validationRules?: validationRulesType;
   validate?: true;
   showAsteriskOnRequired?: boolean;
@@ -124,7 +124,7 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
               `${value}` : value;
           this.setState(() => ({ value: _value }));
 
-          if (this.props.onChange) this.props.onChange(_value, this._resetField);
+          if (this.props.onChange) this.props.onChange(_value, this.props.name, this._resetField);
         },
         onBlur: async (
           value: any,
@@ -146,7 +146,8 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
               );
           }
 
-          if (this.props.onBlur) this.props.onBlur(_value, [...defaultErrors, ...customErrors], this._resetField);
+          if (this.props.onBlur)
+            this.props.onBlur(_value, this.props.name, [...defaultErrors, ...customErrors], this._resetField);
         },
         label: !this.props.hideLabel &&
           (showAsteriskOnRequired && this.props.validationRules && this.props.validationRules.required ?
