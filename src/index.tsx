@@ -7,12 +7,14 @@ import Validator, {
   IEmailValidationOptions,
   IValidationFailMessages,
   IValidationResponse,
+  IArrayValidationOptions,
 } from '@dock365/validator';
 
 export type validationRulesType =
   (IStringValidationOptions & { type: validationTypes.String }) |
   (INumberValidationOptions & { type: validationTypes.Number }) |
   (IDateValidationOptions & { type: validationTypes.Date }) |
+  (IArrayValidationOptions & { type: validationTypes.Array }) |
   (IEmailValidationOptions & { type: validationTypes.Email });
 
 export interface IFieldRenderProps {
@@ -186,6 +188,11 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
           case validationTypes.Email:
             result =
               this.validator[validationTypes.Email](label || name || "", value || "", validationRules);
+            break;
+
+          case validationTypes.Array:
+            result =
+              this.validator[validationTypes.Array](label || name || "", value || "", validationRules);
             break;
 
           default:
