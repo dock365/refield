@@ -141,7 +141,7 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
           let customErrors: string[] = [];
           let defaultErrors: string[] = [];
           if (validate) {
-            defaultErrors = await this._validateField();
+            defaultErrors = await this._validateField(_value);
             if (this.props.customValidation)
               customErrors = await this._updateCustomValidationMessage(
                 this.props.customValidation(_value, this.props.validationRules),
@@ -165,10 +165,9 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
     this.setState({ value: null });
   }
 
-  private _validateField(): Promise<string[]> {
+  private _validateField(value: any): Promise<string[]> {
     return new Promise((resolve, reject) => {
       const { validationRules, label, name } = this.props;
-      const { value } = this.state;
 
       if (validationRules && validationRules.type) {
         let result: IValidationResponse;
@@ -192,7 +191,7 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
 
           case validationTypes.Array:
             result =
-              this.validator[validationTypes.Array](label || name || "", value || "", validationRules);
+              this.validator[validationTypes.Array](label || name || "", value || [], validationRules);
             break;
 
           default:
