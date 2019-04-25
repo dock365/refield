@@ -55,8 +55,8 @@ export interface IFieldProps {
   render: React.ComponentType<IFieldRenderProps>;
   hideLabel?: boolean;
   readOnly?: boolean;
-  onChange?: (value: any, name: string, resetFields: () => void) => void;
-  onBlur?: (value: any, name: string, errors: string[], resetFields: () => void) => void;
+  onChange?: (value: any, name: string, resetFields: () => void) => any;
+  onBlur?: (value: any, name: string, errors: string[], resetFields: () => void) => any;
   validationRules?: validationRulesType;
   validate?: true;
   showAsteriskOnRequired?: boolean;
@@ -126,7 +126,7 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
               `${value}` : value;
           this.setState(() => ({ value: _value }));
 
-          if (this.props.onChange) this.props.onChange(_value, this.props.name, this._resetField);
+          return this.props.onChange && this.props.onChange(_value, this.props.name, this._resetField);
         },
         onBlur: async (
           value: any,
@@ -148,7 +148,7 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
               );
           }
 
-          if (this.props.onBlur)
+          return this.props.onBlur &&
             this.props.onBlur(_value, this.props.name, [...defaultErrors, ...customErrors], this._resetField);
         },
         label: !this.props.hideLabel &&
