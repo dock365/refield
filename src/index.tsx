@@ -124,9 +124,11 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
               validationRules.type === validationTypes.String &&
               typeof value === "number" ?
               `${value}` : value;
-          this.setState(() => ({ value: _value }));
+          const onChange = this.props.onChange && this.props.onChange(_value, this.props.name, this._resetField);
+          if (onChange || onChange === undefined)
+            this.setState(() => ({ value: _value }));
 
-          return this.props.onChange && this.props.onChange(_value, this.props.name, this._resetField);
+          return onChange
         },
         onBlur: async (
           value: any,
