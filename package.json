@@ -6,13 +6,13 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "build-watch": "tsc --watch",
+    "build:watch": "tsc --watch",
     "release": "npm run build && npm publish --access=public && git push --follow-tags",
-    "patch-release": "npm run build && npm version patch && npm publish --access=public && git push --follow-tags",
-    "minor-release": "npm run build && npm version minor && npm publish --access=public && git push --follow-tags",
-    "major-release": "npm run build && npm version major && npm publish --access=public && git push --follow-tags",
-    "preminor-release": "npm run build && npm version preminor && npm publish --access=public && git push --follow-tags",
-    "prerelease": "npm run build && npm version prerelease && npm publish --access=public && git push --follow-tags",
+    "release:patch": "npm run build && npm version patch && npm publish --access=public && git push --follow-tags",
+    "release:minor": "npm run build && npm version minor && npm publish --access=public && git push --follow-tags",
+    "release:major": "npm run build && npm version major && npm publish --access=public && git push --follow-tags",
+    "release:preminor": "npm run build && npm version preminor && npm publish --access=public && git push --follow-tags",
+    "release:pre": "npm run build && npm version prerelease && npm publish --access=public && git push --follow-tags",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
