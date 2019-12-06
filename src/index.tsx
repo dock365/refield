@@ -164,7 +164,7 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
   }
 
   private _resetField() {
-    this.setState({ value: null });
+    this.setState({ value: undefined });
   }
 
   private _validateField(value: any): Promise<string[]> {
