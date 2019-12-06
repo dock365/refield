@@ -87,8 +87,6 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
     this.validator = new Validator({
       failMessages: this.props.validationMessages,
     });
-
-    this._resetField = this._resetField.bind(this);
   }
   public componentDidUpdate(prevProps: IFieldProps) {
     if (
@@ -163,7 +161,7 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
     );
   }
 
-  private _resetField() {
+  private _resetField = () => {
     this.setState({ value: undefined });
   }
 
