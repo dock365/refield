@@ -9,6 +9,7 @@ import Validator, {
   IValidationResponse,
   IArrayValidationOptions,
 } from '@dock365/validator';
+import { IFieldRenderProps } from "@dock365/reform";
 
 export type validationRulesType =
   (IStringValidationOptions & { type: validationTypes.String }) |
@@ -16,30 +17,30 @@ export type validationRulesType =
   (IDateValidationOptions & { type: validationTypes.Date }) |
   (IArrayValidationOptions & { type: validationTypes.Array }) |
   (IEmailValidationOptions & { type: validationTypes.Email });
-
-export interface IFieldRenderProps {
-  name?: string;
-  placeholder?: string;
-  defaultValue?: any;
-  defaultValueIsUpdatable?: boolean;
-  value?: any;
-  customProps?: any;
-  onChange?: (
-    value: any,
-    e?: React.MouseEvent<HTMLInputElement>,
-  ) => void;
-  onBlur?: (
-    value: any,
-    e?: React.MouseEvent<HTMLInputElement>,
-  ) => void;
-  label?: string;
-  validationRules?: validationRulesType;
-  errors?: string[];
-  resetField?: () => void;
-  className?: string;
-  readOnly?: boolean;
-  onClick?: (event: React.MouseEvent<any>) => void;
-}
+//
+// export interface IFieldRenderProps {
+//   name?: string;
+//   placeholder?: string;
+//   defaultValue?: any;
+//   defaultValueIsUpdatable?: boolean;
+//   value?: any;
+//   customProps?: any;
+//   onChange?: (
+//     value: any,
+//     e?: React.MouseEvent<HTMLInputElement>,
+//   ) => void;
+//   onBlur?: (
+//     value: any,
+//     e?: React.MouseEvent<HTMLInputElement>,
+//   ) => void;
+//   label?: string;
+//   validationRules?: validationRulesType;
+//   errors?: string[];
+//   resetField?: () => void;
+//   className?: string;
+//   readOnly?: boolean;
+//   onClick?: (event: React.MouseEvent<any>) => void;
+// }
 
 export enum ValidateOnTypes {
   OnChange,
@@ -52,7 +53,10 @@ export interface IFieldProps {
   placeholder?: string;
   defaultValue?: any;
   defaultValueIsUpdatable?: boolean;
-  render: React.ComponentType<IFieldRenderProps>;
+  render: React.ComponentType<IFieldRenderProps & {
+    defaultValueIsUpdatable?: boolean,
+    className?: string, onClick?: (event: React.MouseEvent<any>) => void,
+  }>;
   hideLabel?: boolean;
   readOnly?: boolean;
   onChange?: (value: any, name: string, resetFields: () => void) => any;
@@ -66,6 +70,7 @@ export interface IFieldProps {
   validationMessages?: IValidationFailMessages;
   onClick?: (event: React.MouseEvent<any>) => void;
 }
+
 export interface IFieldState {
   value: any;
   errors: string[];
@@ -85,20 +90,21 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
     };
 
     this.validator = new Validator({
-      failMessages: this.props.validationMessages,
-    });
+                                     failMessages: this.props.validationMessages,
+                                   });
   }
+
   public componentDidUpdate(prevProps: IFieldProps) {
     if (
       prevProps.defaultValue === undefined && this.props.defaultValue !== prevProps.defaultValue ||
       this.props.defaultValueIsUpdatable && this.props.defaultValue !== prevProps.defaultValue
     ) {
-      this.setState({ value: this.props.defaultValue });
+      this.setState({value: this.props.defaultValue});
     }
   }
 
   public render() {
-    const { validationRules, validate, showAsteriskOnRequired } = this.props;
+    const {validationRules, validate, showAsteriskOnRequired} = this.props;
     const errors = [...this.state.errors, ...this.state.customErrors];
 
     return (
@@ -119,14 +125,14 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
 
           const _value =
             validationRules &&
-              validationRules.type === validationTypes.String &&
-              typeof value === "number" ?
+            validationRules.type === validationTypes.String &&
+            typeof value === "number" ?
               `${value}` : value;
           const onChange = this.props.onChange && this.props.onChange(_value, this.props.name, this._resetField);
           if (onChange || onChange === undefined)
-            this.setState(() => ({ value: _value }));
+            this.setState(() => ({value: _value}));
 
-          return onChange
+          return onChange;
         },
         onBlur: async (
           value: any,
@@ -134,8 +140,8 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
         ) => {
           const _value =
             validationRules &&
-              validationRules.type === validationTypes.String &&
-              typeof value === "number" ?
+            validationRules.type === validationTypes.String &&
+            typeof value === "number" ?
               `${value}` : value;
 
           let customErrors: string[] = [];
@@ -162,12 +168,12 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
   }
 
   private _resetField = () => {
-    this.setState({ value: undefined });
+    this.setState({value: undefined});
   }
 
   private _validateField(value: any): Promise<string[]> {
     return new Promise((resolve, reject) => {
-      const { validationRules, label, name } = this.props;
+      const {validationRules, label, name} = this.props;
 
       if (validationRules && validationRules.type) {
         let result: IValidationResponse;
@@ -202,9 +208,9 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
             break;
         }
         if (!result.success) {
-          this.setState({ errors: result.messages }, () => resolve(result.messages));
+          this.setState({errors: result.messages}, () => resolve(result.messages));
         } else {
-          this.setState({ errors: [] }, () => resolve([]));
+          this.setState({errors: []}, () => resolve([]));
         }
       } else {
         resolve([]);
@@ -214,7 +220,7 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
 
   private _updateCustomValidationMessage(errors: string[]): Promise<string[]> {
     return new Promise((resolve, reject) => {
-      this.setState({ customErrors: errors }, () => resolve(errors));
+      this.setState({customErrors: errors}, () => resolve(errors));
     });
   }
 }
