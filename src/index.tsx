@@ -7,40 +7,23 @@ import Validator, {
   IEmailValidationOptions,
   IValidationFailMessages,
   IValidationResponse,
-  IArrayValidationOptions,
+  IArrayValidationOptions, IRegExValidationOptions,
 } from '@dock365/validator';
-import { IFieldRenderProps } from "@dock365/reform";
+import { IFieldRenderProps as IRenderProps } from "@dock365/reform";
 
 export type validationRulesType =
   (IStringValidationOptions & { type: validationTypes.String }) |
   (INumberValidationOptions & { type: validationTypes.Number }) |
   (IDateValidationOptions & { type: validationTypes.Date }) |
   (IArrayValidationOptions & { type: validationTypes.Array }) |
+  (IRegExValidationOptions & { type: validationTypes.RegEx }) |
   (IEmailValidationOptions & { type: validationTypes.Email });
-//
-// export interface IFieldRenderProps {
-//   name?: string;
-//   placeholder?: string;
-//   defaultValue?: any;
-//   defaultValueIsUpdatable?: boolean;
-//   value?: any;
-//   customProps?: any;
-//   onChange?: (
-//     value: any,
-//     e?: React.MouseEvent<HTMLInputElement>,
-//   ) => void;
-//   onBlur?: (
-//     value: any,
-//     e?: React.MouseEvent<HTMLInputElement>,
-//   ) => void;
-//   label?: string;
-//   validationRules?: validationRulesType;
-//   errors?: string[];
-//   resetField?: () => void;
-//   className?: string;
-//   readOnly?: boolean;
-//   onClick?: (event: React.MouseEvent<any>) => void;
-// }
+
+export interface IFieldRenderProps extends IRenderProps {
+  defaultValueIsUpdatable?: boolean;
+  className?: string;
+  onClick?: (event: React.MouseEvent<any>) => void;
+}
 
 export enum ValidateOnTypes {
   OnChange,
@@ -53,10 +36,7 @@ export interface IFieldProps {
   placeholder?: string;
   defaultValue?: any;
   defaultValueIsUpdatable?: boolean;
-  render: React.ComponentType<IFieldRenderProps & {
-    defaultValueIsUpdatable?: boolean,
-    className?: string, onClick?: (event: React.MouseEvent<any>) => void,
-  }>;
+  render: React.ComponentType<IFieldRenderProps>;
   hideLabel?: boolean;
   readOnly?: boolean;
   onChange?: (value: any, name: string, resetFields: () => void) => any;
@@ -169,7 +149,7 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
 
   private _resetField = () => {
     this.setState({value: undefined});
-  }
+  };
 
   private _validateField(value: any): Promise<string[]> {
     return new Promise((resolve, reject) => {
@@ -198,6 +178,11 @@ export default class Field extends React.Component<IFieldProps, IFieldState> {
           case validationTypes.Array:
             result =
               this.validator[validationTypes.Array](label || name || "", value || [], validationRules);
+            break;
+
+          case validationTypes.RegEx:
+            result =
+              this.validator[validationTypes.RegEx](label || name || "", value || "", validationRules);
             break;
 
           default:
